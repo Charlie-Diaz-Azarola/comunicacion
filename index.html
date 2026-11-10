@@ -296,11 +296,15 @@
   var $ = function (id) { return document.getElementById(id); };
   var reducido = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- Contador de visitas (solo en la web publicada, no en vistas previas) ---------- */
-  if (D.contador && /\.github\.io$/.test(location.hostname)) {
+  /* ---------- Contador de visitas: cuenta solo al pulsar «Abrir el mensaje»
+     (una vez por carga de página; solo en la web publicada, no en vistas previas) ---------- */
+  var visitaContada = false;
+  function contarVisita() {
+    if (visitaContada || !D.contador || !/\.github\.io$/.test(location.hostname)) return;
+    visitaContada = true;
     try {
       fetch(D.contador.url + "?action=increment&mensaje=" + encodeURIComponent(D.contador.mensaje) +
-            "&titulo=" + encodeURIComponent(D.titulo), { mode: "no-cors" });
+            "&titulo=" + encodeURIComponent(D.titulo), { mode: "no-cors", keepalive: true });
     } catch (e) {}
   }
 
@@ -524,6 +528,7 @@
 
   /* ---------- Apertura ---------- */
   $("abrir").addEventListener("click", function () {
+    contarVisita();
     $("portada").classList.add("fuera");
     document.body.classList.remove("cerrado");
     $("barra").classList.add("activa");
