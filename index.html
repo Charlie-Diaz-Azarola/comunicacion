@@ -391,29 +391,22 @@
   cola.push({ el: $("acciones"), pausa: 0 });
 
   /* ---------- Aparición progresiva ---------- */
-  var indice = 0, temporizador = null, seguir = true, terminado = false;
+  // El desplazamiento vertical lo controla siempre el lector (la página no se mueve sola)
+  var indice = 0, temporizador = null;
   function mostrar(el) { el.classList.add("visible"); }
-  function acompañar(el) {
-    var r = el.getBoundingClientRect(), alto = window.innerHeight;
-    if (!seguir) { if (r.bottom > 0 && r.bottom < alto * 0.85) seguir = true; else return; }
-    if (r.bottom > alto * 0.72) window.scrollBy({ top: r.bottom - alto * 0.55, behavior: reducido ? "auto" : "smooth" });
-  }
   function siguiente() {
     if (indice >= cola.length) { acabar(); return; }
     var item = cola[indice++];
     mostrar(item.el);
     if (item.el.querySelectorAll) item.el.querySelectorAll(".w").forEach(mostrar);
-    acompañar(item.el);
     temporizador = setTimeout(siguiente, item.pausa);
   }
   function acabar() {
-    terminado = true; clearTimeout(temporizador);
+    clearTimeout(temporizador);
     for (; indice < cola.length; indice++) mostrar(cola[indice].el);
     document.querySelectorAll(".w").forEach(mostrar);
     $("b-todo").classList.add("oculto");
   }
-  ["wheel", "touchmove"].forEach(function (ev) { window.addEventListener(ev, function () { if (!terminado) seguir = false; }, { passive: true }); });
-  window.addEventListener("keydown", function (e) { if (/^(Arrow|Page|Home|End| )/.test(e.key)) seguir = false; });
   $("b-todo").addEventListener("click", acabar);
 
   /* ---------- Música ---------- */
